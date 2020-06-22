@@ -1,0 +1,44 @@
+on: 
+  push:
+    branches:
+      - master
+
+name: Test & Build with Docker
+
+env:
+  REPO_NAME: sectionsix-assessment
+  NODE_VERSION: '14.2'   
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-18.04
+    steps:
+      # checkout the repo
+      - name: 'Checkout GitHub Action' 
+        uses: actions/checkout@master
+      - name: Use Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: npm install, build, and test
+        run: |
+          npm install
+          npm run build --if-present
+          npm test
+      - name: Build the Docker image
+        run: | 
+          docker build . --file docker/Dockerfile --tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.REPO_NAME }}:${GITHUB_SHA::8}
+          docker tag  ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.REPO_NAME }}:${GITHUB_SHA::8} ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.REPO_NAME }}:latest
+      # Run smoke tests in newly built contaner
+      - name: Run A Container on the Built Image
+        run: docker run -d -p 8080:8080 ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.REPO_NAME }}:${GITHUB_SHA::8}
+      - name: Output CONTAINER_ID as Variable
+        id: CONTAINER_ID
+        run: echo "::set-output name=CONTAINER_ID::$(docker ps | tail -1 | cut -d' ' -f1)"
+      - name: Build Validation Test
+        run: docker exec --tty ${{steps.CONTAINER_ID.outputs.CONTAINER_ID}} ./node_modules/.bin/mocha ./docker/**/*.test.js --exit
+      # Push built image to Dockerhub
+      - name: Login to DockerHub Registry
+        run: echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+      - name: Publish Image to Dockerhub
+        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.REPO_NAME }}:${GITHUB_SHA::8}
