@@ -28,7 +28,7 @@ describe("Endpoint route test suites", () => {
     describe("Endpoint › GET '/convert'", () => {
         it("should return OK", done => {
             request(app)
-                .get("/convert")
+                .get("/convert?id=274")
                 .end((err, res) => {
                     if (err) done(err)
                     expect(res.status).to.equal(200)
