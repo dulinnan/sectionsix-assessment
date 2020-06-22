@@ -27,7 +27,7 @@ describe("Endpoint route test suites", () => {
     // BDD styled test /convert endpoint
     describe("Endpoint › GET '/convert'", () => {
         it("should return OK", done => {
-            request(app)
+            request(server)
                 .get("/convert?id=274")
                 .end((err, res) => {
                     if (err) done(err)
