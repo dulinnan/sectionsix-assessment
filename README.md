@@ -30,9 +30,21 @@ A [dedicated logger](https://github.com/trentm/node-bunyan) is used for the pote
 
 ~~The [Swagger/OpenAPI standard](https://swagger.io/specification/) is also implemented in this Web API for validation purposes.~~ Did not implement swagger validation.
 
+## Continuous integration
+
+A CI pipeline has been set up in [Github Actions](https://github.com/dulinnan/sectionsix-assessment/blob/master/.github/workflows/) to automatically start the following actions on each successful commit pushed to the _master_
+branch in this repo:
+
+1. Install NodeJS with all necessary dependencies.
+2. Run the unit test suite.
+3. Build Docker image (see [Dockerfile](https://github.com/dulinnan/sectionsix-assessment/blob/master/docker/Dockerfile) for more details) that contains the app and encapsulates its dependencies
+4. Run a container based on the built Docker image.
+5. Validate the container/image by running a post-build validation [test](https://github.com/dulinnan/sectionsix-assessment/tree/master/docker/build_test).
+6. The Docker image is tagged with git commit SHA and published to a [public DockerHub repo](https://hub.docker.com/repository/docker/adamdu/sectionsix-assessment), if all above steps have passed successfully.
+
 ## Testing
 
-A suite of _unit tests_ can be found under [ops_technical_test/tests/](https://github.com/dulinnan/ops-technical-test/tree/master/tests).
+A suite of _unit tests_ can be found under [sectionsix-assessment/tests/](https://github.com/dulinnan/sectionsix-assessment/tree/master/tests).
 
 Testing framework [mocha](https://mochajs.org) and [chai](https://www.chaijs.com/) are being used during
 development and in the CI environment.
@@ -76,10 +88,36 @@ $ yarn start
 
 4. The Web API can accessed at http://localhost:8080/. You can also use [Postman](https://www.postman.com/) or any similar tool to test the endpoints
 
+
 ### Deploy as Docker container image.
 
 Docker is a container based platform which ensures that you do not contaminate your host system.
 
+#### Getting docker (for Linux, Mac & Windows)
+
+Read [https://docs.docker.com/install/](https://docs.docker.com/install/)
+
+#### Docker image
+
+The Github Actions pipeline automatically publishes the docker image to a public DockerHub repo, on each git commit.
+
+Download latest image:
+
+```
+$ docker pull adamdu/sectionsix-assessment:<latest-git-commit-sha>
+```
+
+> Note that Docker image's `latest` tag is not dynamic nor descriptive. Hence the `latest` is not used in this project.
+
+To run a Docker container with the latest version of the Web API:
+
+```
+$ docker run -d -p 8080:8080 adamdu/sectionsix-assessment:<latest-git-commit-sha>
+```
+
+> All available tags are listed [here](https://hub.docker.com/repository/docker/adamdu/sectionsix-assessment/tags?page=1).
+
+You will be able to access the API at http://localhost:8080/ after Docker successfully runs the container.
 
 
 ## What challenges did you encounter during the timestamp conversion? How did you resolve these?
