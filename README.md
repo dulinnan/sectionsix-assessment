@@ -2,6 +2,8 @@
 
 # sectionsix-technical-test
 
+![Test & Build with Docker](https://github.com/dulinnan/sectionsix-assessment/workflows/Test%20&%20Build%20with%20Docker/badge.svg)
+
 ## Overview
 
 This is a simple Web API that serves two endpoints as instructed in the `Technical assessment (Timezone).pdf`:
